@@ -1155,6 +1155,10 @@ body::after{
     if (fast) {
       boot.classList.add('boot-fast','boot-hide');
       html.classList.remove('pre-reveal');
+      setTimeout(function(){
+        window._bootDone = true;
+        document.dispatchEvent(new CustomEvent('bootDone'));
+      }, 0);
       setTimer(function(){
         boot.style.display = 'none';
         html.classList.remove('boot-active');
@@ -1167,6 +1171,8 @@ body::after{
     setTimer(function(){
       boot.classList.add('boot-hide');
       html.classList.remove('pre-reveal');
+      window._bootDone = true;
+      document.dispatchEvent(new CustomEvent('bootDone'));
     }, 180);
     setTimer(function(){
       boot.style.display = 'none';
@@ -1253,10 +1259,12 @@ body::after{
     if(i<=text.length){
       el.textContent=text.slice(0,i);
       i++;
-      setTimeout(type, i===1?600:65+Math.random()*40);
+      setTimeout(type, i===1?120:65+Math.random()*40);
     }
   }
-  setTimeout(type,400);
+  function start(){ setTimeout(type, 200); }
+  if (window._bootDone) { start(); }
+  else { document.addEventListener('bootDone', start, { once: true }); }
 })();
 
 // ── HEADER SCROLL ──
