@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="en" class="pre-reveal boot-active">
 <head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-TW89B40RQ2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-TW89B40RQ2');
+</script>
 <noscript><style>
   .boot-screen{display:none!important;}
   html.pre-reveal,html.pre-reveal *{animation-play-state:running!important;}
@@ -62,7 +70,7 @@
 }
 
 *{box-sizing:border-box;margin:0;padding:0;}
-html{overflow-x:hidden;scroll-behavior:smooth;}
+html{overflow-x:hidden;scroll-behavior:smooth;background:var(--bg-deep);}
 body{
   background:var(--bg-deep);
   color:var(--ink);
@@ -607,11 +615,11 @@ section{position:relative;z-index:1;padding:80px 0;}
 
 .game-screen{
   position:relative;border-radius:0 var(--radius) var(--radius) var(--radius);
-  border:1px solid var(--border-c);background:var(--bg-card);
+  border:1px solid transparent;background:var(--bg-card);
   padding:3px;overflow:hidden;
-  box-shadow:0 0 0 1px rgba(56,236,245,.08), 0 32px 80px rgba(0,0,0,.6);
+  box-shadow:0 32px 80px rgba(0,0,0,.6);
 }
-.game-screen.active-waterfall{border-color:rgba(56,236,245,.3);box-shadow:0 0 40px rgba(56,236,245,.05) inset;}
+.game-screen.active-waterfall{box-shadow:0 32px 80px rgba(0,0,0,.6), 0 0 40px rgba(56,236,245,.06) inset;}
 .corner{position:absolute;width:22px;height:22px;border:2px solid var(--cyan-1);opacity:.8;z-index:3;pointer-events:none;transition:opacity .3s;}
 .corner-tl{top:8px;left:8px;border-right:none;border-bottom:none;border-radius:6px 0 0 0;}
 .corner-tr{top:8px;right:8px;border-left:none;border-bottom:none;border-radius:0 6px 0 0;}
