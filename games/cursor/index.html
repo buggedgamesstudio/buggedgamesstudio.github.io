@@ -27,17 +27,18 @@
   *{box-sizing:border-box;}
   html{
     margin:0;padding:0;
+    background:var(--bg-deep);
     -webkit-overflow-scrolling:touch;
     overflow-y:scroll;
   }
   body{
     margin:0;padding:0;
-    background:transparent;
+    background:var(--bg-deep);
     display:flex;
     justify-content:center;
-    padding:12px 10px 6px;
+    padding:12px 10px 0;
     font-family:'Manrope',sans-serif;
-    min-height:100vh;
+    min-height:100%;
     overflow-x:hidden;
   }
 
@@ -824,7 +825,7 @@
   var FONT_SIZE = 13;
 
   function resize(){
-    var dpr = window.devicePixelRatio || 1;
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
     var w = canvas.offsetWidth;
     var h = canvas.offsetHeight;
     canvas.width  = Math.round(w * dpr);
@@ -907,7 +908,7 @@
 
     /* Outer glow */
     ctx.shadowColor = '#00e5cc';
-    ctx.shadowBlur = 40 * glow;
+    if(!isMob){ ctx.shadowBlur = 40 * glow; }
 
     /* Arrow shape (pointer cursor) */
     ctx.beginPath();
@@ -925,7 +926,7 @@
     ctx.fill();
 
     /* Stroke */
-    ctx.shadowBlur = 20 * glow;
+    if(!isMob){ ctx.shadowBlur = 20 * glow; }
     ctx.strokeStyle = 'rgba(255,255,255,' + (0.6 + 0.2 * glow) + ')';
     ctx.lineWidth = 2;
     ctx.stroke();
@@ -1038,7 +1039,7 @@
   for(var i=0;i<MAX_P;i++) particles.push(mkParticle());
 
   function resizeCanvas(){
-    var dpr = window.devicePixelRatio || 1;
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
     var w = canvas.offsetWidth;
     var h = canvas.offsetHeight;
     if(canvas.width !== Math.round(w*dpr) || canvas.height !== Math.round(h*dpr)){
@@ -1116,7 +1117,7 @@
       ctx.save();
       ctx.globalAlpha = pk.alpha;
       ctx.shadowColor = '#00e5cc';
-      ctx.shadowBlur  = pk.r * 3;
+      if(!isMob){ ctx.shadowBlur = pk.r * 3; }
       ctx.fillStyle   = '#c0fff5';
       ctx.beginPath();
       ctx.arc(px, py, pk.r, 0, Math.PI*2);
@@ -1138,11 +1139,12 @@
   if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
   var ctx = canvas.getContext('2d');
-  var N = 28;
+  var isMob = window.matchMedia('(pointer:coarse)').matches;
+  var N = isMob ? 14 : 28;
   var pts = [];
 
   function resize(){
-    var dpr = window.devicePixelRatio || 1;
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
     var w = canvas.offsetWidth;
     var h = canvas.offsetHeight;
     if(canvas.width !== Math.round(w*dpr) || canvas.height !== Math.round(h*dpr)){
@@ -1181,7 +1183,7 @@
       ctx.save();
       ctx.globalAlpha = p.alpha;
       ctx.shadowColor = p.color;
-      ctx.shadowBlur  = p.r * 3;
+      if(!isMob){ ctx.shadowBlur = p.r * 3; }
       ctx.fillStyle   = p.color;
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
@@ -1241,12 +1243,13 @@
   if(!canvas) return;
   if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   var ctx = canvas.getContext('2d');
-  var N = 32;
+  var isMob2 = window.matchMedia('(pointer:coarse)').matches;
+  var N = isMob2 ? 16 : 32;
   var flakes = [];
   function W(){ return canvas.offsetWidth; }
   function H(){ return canvas.offsetHeight; }
   function resize(){
-    var dpr = window.devicePixelRatio || 1;
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
     var w = canvas.offsetWidth;
     var h = canvas.offsetHeight;
     if(canvas.width !== Math.round(w*dpr) || canvas.height !== Math.round(h*dpr)){
@@ -1316,7 +1319,7 @@
   var ctx = canvas.getContext('2d');
   function draw(){
     var w = canvas.offsetWidth, h = canvas.offsetHeight;
-    var dpr = window.devicePixelRatio || 1;
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
     canvas.width = Math.round(w * dpr);
     canvas.height = Math.round(h * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -1331,6 +1334,78 @@
   draw();
   window.addEventListener('resize', draw);
 })();
+
+
+/* ── HEIGHT REPORTER: tell parent iframe our full scrollHeight ── */
+(function(){
+  function reportHeight(){
+    var h = Math.max(
+      document.documentElement.scrollHeight,
+      document.body ? document.body.scrollHeight : 0
+    );
+    try{ window.parent.postMessage({ type: 'iframeHeight', height: h }, '*'); }catch(e){}
+  }
+  // Report on load and after fonts/images settle
+  window.addEventListener('load', function(){
+    reportHeight();
+    setTimeout(reportHeight, 300);
+    setTimeout(reportHeight, 1000);
+  });
+  // ResizeObserver watches for layout changes (images load, JS adds content)
+  if(window.ResizeObserver){
+    var ro = new ResizeObserver(function(){ reportHeight(); });
+    ro.observe(document.documentElement);
+  }
+  // Also report on resize (viewport width changes)
+  window.addEventListener('resize', function(){ setTimeout(reportHeight, 150); });
+})();
+
+/* ── PERF: pause all RAF when tab/iframe is hidden ── */
+(function(){
+  var _raf = window.requestAnimationFrame;
+  var _caf = window.cancelAnimationFrame;
+  var _paused = false;
+  var _queue = [];
+  var _ids = {};
+  var _nextId = 1;
+
+  window.requestAnimationFrame = function(cb){
+    if(_paused){
+      var id = _nextId++;
+      _queue.push({id:id, cb:cb});
+      _ids[id] = true;
+      return id;
+    }
+    return _raf.call(window, cb);
+  };
+  window.cancelAnimationFrame = function(id){
+    if(_ids[id]){
+      _queue = _queue.filter(function(x){ return x.id !== id; });
+      delete _ids[id];
+      return;
+    }
+    return _caf.call(window, id);
+  };
+
+  function pause(){
+    if(_paused) return;
+    _paused = true;
+  }
+  function resume(){
+    if(!_paused) return;
+    _paused = false;
+    var q = _queue.slice(); _queue = []; _ids = {};
+    q.forEach(function(item){ _raf.call(window, item.cb); });
+  }
+
+  document.addEventListener('visibilitychange', function(){
+    if(document.hidden){ pause(); } else { resume(); }
+  });
+
+  // Also respond to parent page freezing via postMessage (optional, no-op if not used)
+  // Already handled by visibilitychange for same-origin iframes
+})();
+
 </script>
 
 </body>

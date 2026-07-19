@@ -163,14 +163,20 @@ html.pre-reveal .particles{opacity:0;}
     linear-gradient(rgba(56,236,245,.16) 1px,transparent 1px),
     linear-gradient(90deg,rgba(56,236,245,.16) 1px,transparent 1px);
   background-size:46px 46px;
-  transform:perspective(420px) rotateX(72deg);
   transform-origin:bottom;
   -webkit-mask-image:linear-gradient(to top,rgba(0,0,0,.85),transparent);
   mask-image:linear-gradient(to top,rgba(0,0,0,.85),transparent);
   animation:boot-grid-scroll 3.6s linear infinite;
+  will-change:transform;
   opacity:.5;pointer-events:none;
 }
-@keyframes boot-grid-scroll{from{background-position:0 0,0 0;}to{background-position:0 46px,0 0;}}
+/* transform-only animation (compositor thread) instead of animating
+   background-position, which forced a full repaint of this element on
+   every frame — that was the single biggest source of boot-screen jank. */
+@keyframes boot-grid-scroll{
+  from{transform:perspective(420px) rotateX(72deg) translateY(0);}
+  to{transform:perspective(420px) rotateX(72deg) translateY(46px);}
+}
 
 .boot-inner{
   position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;
@@ -665,11 +671,27 @@ section{position:relative;z-index:1;padding:80px 0;}
 
 .iframe-wrap{
   width:100%;border-radius:calc(var(--radius) - 4px);overflow:hidden;
-  background:#08201d;
+  background:var(--bg-card);position:relative;
 }
+/* Skeleton shown while iframe loads */
+.iframe-wrap::before{
+  content:'';display:block;position:absolute;inset:0;
+  background:linear-gradient(90deg,#0a1a18 25%,#0d2420 50%,#0a1a18 75%);
+  background-size:200% 100%;
+  animation:iframe-shimmer 1.6s ease-in-out infinite;
+  pointer-events:none;z-index:0;
+  opacity:1;transition:opacity .3s;
+}
+.iframe-wrap.loaded::before{opacity:0;pointer-events:none;}
+@keyframes iframe-shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
 .iframe-wrap iframe{
-  width:100%;height:1500px;border:0;display:block;background:#08201d;
+  width:100%;
+  height:auto;       /* auto — JS sets it after load */
+  min-height:600px;  /* reasonable floor before content measures */
+  border:0;display:block;background:transparent;
+  position:relative;z-index:1;
 }
+@media(max-width:600px){.iframe-wrap iframe{min-height:500px;}}
 .panel-fullscreen{
   display:flex;align-items:center;justify-content:center;gap:8px;
   font-family:'JetBrains Mono',monospace;font-size:.72rem;letter-spacing:.08em;
@@ -678,7 +700,6 @@ section{position:relative;z-index:1;padding:80px 0;}
   transition:color .2s;
 }
 .panel-fullscreen:hover{color:var(--cyan-1);}
-@media(max-width:600px){.iframe-wrap iframe{height:1700px;}}
 
 .placeholder-panel{
   min-height:400px;display:flex;flex-direction:column;
@@ -834,7 +855,7 @@ section{position:relative;z-index:1;padding:80px 0;}
   .hero{padding:70px 16px 50px;}
   section{padding:60px 0;}
   .site-wrap{padding:0 16px 40px;}
-  .tab-btn.flagship .flagship-badge{display:none;}
+  .tab-btn.flagship .tab-flagship-badge{display:none;}
   .tab-divider{display:none;}
 }
 
@@ -853,6 +874,10 @@ body::after{
   pointer-events:none;z-index:9998;mix-blend-mode:overlay;
   transform:translateZ(0);
 }
+/* Skip the blend-mode grain layer during boot: it sits above everything
+   and forces per-frame blending against every boot-screen animation for
+   no visible benefit (boot screen covers it anyway). */
+html.boot-active body::after{display:none;}
 
 /* ── HERO GRID OVERLAY ── */
 .hero::after{
@@ -1039,28 +1064,28 @@ body::after{
 
       <div class="game-panel" data-panel="toaster">
         <div class="iframe-wrap">
-          <iframe src="games/toaster/index.html" title="Toaster" loading="lazy"></iframe>
+          <iframe data-src="games/toaster/index.html" title="Toaster"></iframe>
           <a class="panel-fullscreen" href="games/toaster/index.html" target="_blank" rel="noopener">Open fullscreen ⤢</a>
         </div>
       </div>
 
       <div class="game-panel" data-panel="cursor">
         <div class="iframe-wrap">
-          <iframe src="games/cursor/index.html" title="Cursor" loading="lazy"></iframe>
+          <iframe data-src="games/cursor/index.html" title="Cursor"></iframe>
           <a class="panel-fullscreen" href="games/cursor/index.html" target="_blank" rel="noopener">Open fullscreen ⤢</a>
         </div>
       </div>
 
       <div class="game-panel" data-panel="anthos">
         <div class="iframe-wrap">
-          <iframe src="games/anthos/index.html" title="Anthos" loading="lazy"></iframe>
+          <iframe data-src="games/anthos/index.html" title="Anthos"></iframe>
           <a class="panel-fullscreen" href="games/anthos/index.html" target="_blank" rel="noopener">Open fullscreen ⤢</a>
         </div>
       </div>
 
       <div class="game-panel" data-panel="blobi">
         <div class="iframe-wrap">
-          <iframe src="games/blobi/index.html" title="Blobi" loading="lazy"></iframe>
+          <iframe data-src="games/blobi/index.html" title="Blobi"></iframe>
           <a class="panel-fullscreen" href="games/blobi/index.html" target="_blank" rel="noopener">Open fullscreen ⤢</a>
         </div>
       </div>
@@ -1364,14 +1389,26 @@ function scheduleFlagshipLoad(){
   var sectionInView = true;
 
   function freezeIframe(iframe) {
-    if (!iframe || iframe.dataset.frozen === '1') return;
-    iframe.dataset.realSrc = iframe.src || iframe.dataset.src || '';
+    if (!iframe) return;
+    // Never freeze a not-yet-loaded iframe (has data-src but no src yet) — just leave it unloaded
+    if (!iframe.src || iframe.src === 'about:blank' || iframe.src === window.location.href) return;
+    if (iframe.dataset.frozen === '1') return;
+    iframe.dataset.realSrc = iframe.src;
     iframe.src = 'about:blank';
     iframe.dataset.frozen = '1';
   }
   function unfreezeIframe(iframe) {
-    if (!iframe || iframe.dataset.frozen !== '1') return;
-    iframe.src = iframe.dataset.realSrc || iframe.dataset.src || iframe.src;
+    if (!iframe) return;
+    // First-time load: iframe has data-src but no real src yet
+    var lazySrc = iframe.dataset.src;
+    if (lazySrc && (!iframe.src || iframe.src === 'about:blank' || iframe.src === window.location.href)) {
+      iframe.src = lazySrc;
+      delete iframe.dataset.src;
+      iframe.dataset.frozen = '0';
+      return;
+    }
+    if (iframe.dataset.frozen !== '1') return;
+    iframe.src = iframe.dataset.realSrc || iframe.src;
     iframe.dataset.frozen = '0';
   }
 
@@ -1428,18 +1465,70 @@ function scheduleFlagshipLoad(){
 })();
 
 // ── IFRAME AUTO-HEIGHT ──
+// Primary: postMessage from each game page sends its scrollHeight
+// Fallback: direct DOM read (same-origin, works when panel is visible)
 (function(){
-  var frame = document.getElementById('wfFrame');
-  if(!frame) return;
-  function fit(){
+  var frames = document.querySelectorAll('.iframe-wrap iframe');
+  if(!frames.length) return;
+
+  function applyHeight(frame, h){
+    if(h > 200){
+      frame.style.height = h + 'px';
+      var wrap = frame.closest('.iframe-wrap');
+      if(wrap) wrap.classList.add('loaded');
+    }
+  }
+
+  // Fallback: read DOM directly (works when panel isn't display:none)
+  function fitDirect(frame){
     try{
-      var doc=frame.contentWindow.document;
-      var h=Math.max(doc.documentElement.scrollHeight,doc.body.scrollHeight);
-      if(h>200) frame.style.height=h+'px';
+      var doc = frame.contentWindow && frame.contentWindow.document;
+      if(!doc || !doc.body) return;
+      var h = Math.max(
+        doc.documentElement.scrollHeight,
+        doc.body.scrollHeight
+      );
+      applyHeight(frame, h);
     }catch(e){}
   }
-  frame.addEventListener('load',function(){ fit(); setTimeout(fit,400); setTimeout(fit,1200); });
-  var rt; window.addEventListener('resize',function(){ clearTimeout(rt); rt=setTimeout(fit,200); });
+
+  // Primary: listen for height messages from game pages
+  window.addEventListener('message', function(e){
+    if(!e.data || e.data.type !== 'iframeHeight') return;
+    frames.forEach(function(frame){
+      try{
+        if(frame.contentWindow === e.source){
+          applyHeight(frame, e.data.height);
+        }
+      }catch(ex){}
+    });
+  });
+
+  frames.forEach(function(frame){
+    frame.addEventListener('load', function(){
+      setTimeout(function(){ fitDirect(frame); }, 200);
+      setTimeout(function(){ fitDirect(frame); }, 800);
+      setTimeout(function(){ fitDirect(frame); }, 2000);
+    });
+  });
+
+  var rt;
+  window.addEventListener('resize', function(){
+    clearTimeout(rt);
+    rt = setTimeout(function(){ frames.forEach(fitDirect); }, 250);
+  });
+
+  // Re-fit on tab switch
+  document.querySelectorAll('.tab-btn').forEach(function(tab){
+    tab.addEventListener('click', function(){
+      var key = tab.getAttribute('data-panel');
+      var iframe = document.querySelector('.game-panel[data-panel="'+key+'"] iframe');
+      if(iframe){
+        setTimeout(function(){ fitDirect(iframe); }, 80);
+        setTimeout(function(){ fitDirect(iframe); }, 500);
+      }
+    });
+  });
 })();
 
 // ── MOUSE GLOW ON CARDS ──

@@ -27,18 +27,19 @@
   *{box-sizing:border-box;}
   html{
     margin:0;padding:0;
+    background:var(--bg-deep);
     /* allow native momentum scroll on iOS */
     -webkit-overflow-scrolling:touch;
     overflow-y:scroll;
   }
   body{
     margin:0;padding:0;
-    background:transparent;
+    background:var(--bg-deep);
     display:flex;
     justify-content:center;
-    padding:12px 10px 6px;
+    padding:12px 10px 0;
     font-family:'Manrope',sans-serif;
-    min-height:100vh;
+    min-height:100%;
     /* prevent horizontal overflow on narrow screens */
     overflow-x:hidden;
   }
@@ -973,7 +974,7 @@
 
     <div class="polaroid">
       <div class="photo">
-        <video autoplay muted loop playsinline poster="">
+        <video muted loop playsinline preload="none" poster="" id="__deferredVideo">
           <source src="video.mp4" type="video/mp4">
         </video>
 
@@ -1036,15 +1037,15 @@
     <div class="shots-grid">
       <div class="shot">
         <span class="shot-index">01</span>
-        <img src="shot-1.png" alt="TOASTER screenshot 1">
+        <img src="shot-1.png" alt="TOASTER screenshot 1" loading="lazy">
       </div>
       <div class="shot">
         <span class="shot-index">02</span>
-        <img src="shot-2.png" alt="TOASTER screenshot 2">
+        <img src="shot-2.png" alt="TOASTER screenshot 2" loading="lazy">
       </div>
       <div class="shot">
         <span class="shot-index">03</span>
-        <img src="shot-3.png" alt="TOASTER screenshot 3">
+        <img src="shot-3.png" alt="TOASTER screenshot 3" loading="lazy">
       </div>
     </div>
   </div>
@@ -1378,7 +1379,7 @@
 
   /* ── Canvas size sync ── */
   function resizeCanvas(){
-    var dpr = window.devicePixelRatio || 1;
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
     var w   = canvas.offsetWidth;
     var h   = canvas.offsetHeight;
     if(canvas.width !== w*dpr || canvas.height !== h*dpr){
@@ -1445,8 +1446,7 @@
       ctx.save();
       ctx.translate(bx, by);
       ctx.globalAlpha = fl.alpha;
-      ctx.shadowColor = '#bdeaff';
-      ctx.shadowBlur  = fl.r * 2.4;
+      if(!isMob){ ctx.shadowColor = '#bdeaff'; ctx.shadowBlur = fl.r * 2.4; }
       ctx.fillStyle   = '#eef9ff';
       ctx.beginPath();
       ctx.arc(0, 0, fl.r, 0, Math.PI * 2);
@@ -1725,14 +1725,15 @@
   if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
   var ctx = canvas.getContext('2d');
-  var N = 32;
+  var isMob = window.matchMedia('(pointer:coarse)').matches;
+  var N = isMob ? 16 : 32;
   var flakes = [];
 
   function W(){ return canvas.offsetWidth; }
   function H(){ return canvas.offsetHeight; }
 
   function resize(){
-    var dpr = window.devicePixelRatio || 1;
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
     var w = canvas.offsetWidth;
     var h = canvas.offsetHeight;
     if(canvas.width !== Math.round(w*dpr) || canvas.height !== Math.round(h*dpr)){
@@ -1885,7 +1886,92 @@
   }
 })();
 
+
+
+/* ── HEIGHT REPORTER: tell parent iframe our full scrollHeight ── */
+(function(){
+  function reportHeight(){
+    var h = Math.max(
+      document.documentElement.scrollHeight,
+      document.body ? document.body.scrollHeight : 0
+    );
+    try{ window.parent.postMessage({ type: 'iframeHeight', height: h }, '*'); }catch(e){}
+  }
+  // Report on load and after fonts/images settle
+  window.addEventListener('load', function(){
+    reportHeight();
+    setTimeout(reportHeight, 300);
+    setTimeout(reportHeight, 1000);
+  });
+  // ResizeObserver watches for layout changes (images load, JS adds content)
+  if(window.ResizeObserver){
+    var ro = new ResizeObserver(function(){ reportHeight(); });
+    ro.observe(document.documentElement);
+  }
+  // Also report on resize (viewport width changes)
+  window.addEventListener('resize', function(){ setTimeout(reportHeight, 150); });
+})();
+
+/* ── PERF: pause all RAF when tab/iframe is hidden ── */
+(function(){
+  var _raf = window.requestAnimationFrame;
+  var _caf = window.cancelAnimationFrame;
+  var _paused = false;
+  var _queue = [];
+  var _ids = {};
+  var _nextId = 1;
+
+  window.requestAnimationFrame = function(cb){
+    if(_paused){
+      var id = _nextId++;
+      _queue.push({id:id, cb:cb});
+      _ids[id] = true;
+      return id;
+    }
+    return _raf.call(window, cb);
+  };
+  window.cancelAnimationFrame = function(id){
+    if(_ids[id]){
+      _queue = _queue.filter(function(x){ return x.id !== id; });
+      delete _ids[id];
+      return;
+    }
+    return _caf.call(window, id);
+  };
+
+  function pause(){
+    if(_paused) return;
+    _paused = true;
+  }
+  function resume(){
+    if(!_paused) return;
+    _paused = false;
+    var q = _queue.slice(); _queue = []; _ids = {};
+    q.forEach(function(item){ _raf.call(window, item.cb); });
+  }
+
+  document.addEventListener('visibilitychange', function(){
+    if(document.hidden){ pause(); } else { resume(); }
+  });
+
+  // Also respond to parent page freezing via postMessage (optional, no-op if not used)
+  // Already handled by visibilitychange for same-origin iframes
+})();
+
 </script>
 
+
+<script>
+// Defer video buffering/playback until the browser is idle, so it doesn't
+// compete with this iframe's own first paint / the parent page's boot
+// and reveal animations for network + main-thread time.
+(function(){
+  var v = document.getElementById('__deferredVideo');
+  if(!v) return;
+  function start(){ v.preload='auto'; v.load(); v.play().catch(function(){}); }
+  if('requestIdleCallback' in window) requestIdleCallback(start, {timeout:1200});
+  else setTimeout(start, 300);
+})();
+</script>
 </body>
 </html>
