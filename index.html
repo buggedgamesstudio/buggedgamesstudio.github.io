@@ -18,7 +18,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Bugged Games | Home</title>
-<meta name="description" content="A small indie studio. We make games on Unity (C#): voxel 3D and 2D. Flagship project — WATERFALL." />
+<meta name="description" content="A small indie studio. We make games on Unity (C#): voxel 3D and 2D. Main project — WATERFALL." />
 <meta name="theme-color" content="#060608"/>
 <meta name="color-scheme" content="dark"/>
 <link rel="canonical" href="https://buggedgames.studio/"/>
@@ -29,13 +29,13 @@
 <meta property="og:type" content="website"/>
 <meta property="og:url" content="https://buggedgames.studio/"/>
 <meta property="og:title" content="Bugged Games — Indie Studio"/>
-<meta property="og:description" content="A small indie studio making games on Unity (C#): voxel 3D and 2D. Flagship project — WATERFALL."/>
+<meta property="og:description" content="A small indie studio making games on Unity (C#): voxel 3D and 2D. Main project — WATERFALL."/>
 <meta property="og:image" content="assets/logo.png"/>
 
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="Bugged Games — Indie Studio"/>
-<meta name="twitter:description" content="A small indie studio making games on Unity (C#). Flagship project — WATERFALL."/>
+<meta name="twitter:description" content="A small indie studio making games on Unity (C#). Main project — WATERFALL."/>
 <meta name="twitter:image" content="assets/logo.png"/>
 
 <!-- Resource hints -->
@@ -158,17 +158,17 @@ html.pre-reveal .particles{opacity:0;}
 @media(pointer:coarse){.boot-screen{cursor:auto;}}
 
 .boot-gridfloor{
-  position:absolute;left:-60%;right:-60%;bottom:0;height:55%;
+  position:absolute;left:-60%;right:-60%;bottom:0;height:60%;
   background-image:
-    linear-gradient(rgba(56,236,245,.16) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(56,236,245,.16) 1px,transparent 1px);
+    linear-gradient(rgba(56,236,245,.28) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(56,236,245,.28) 1px,transparent 1px);
   background-size:46px 46px;
   transform-origin:bottom;
-  -webkit-mask-image:linear-gradient(to top,rgba(0,0,0,.85),transparent);
-  mask-image:linear-gradient(to top,rgba(0,0,0,.85),transparent);
+  -webkit-mask-image:linear-gradient(to top,rgba(0,0,0,1) 0%,rgba(0,0,0,.6) 40%,transparent 100%);
+  mask-image:linear-gradient(to top,rgba(0,0,0,1) 0%,rgba(0,0,0,.6) 40%,transparent 100%);
   animation:boot-grid-scroll 3.6s linear infinite;
   will-change:transform;
-  opacity:.5;pointer-events:none;
+  opacity:.7;pointer-events:none;
 }
 /* transform-only animation (compositor thread) instead of animating
    background-position, which forced a full repaint of this element on
@@ -542,7 +542,12 @@ section{position:relative;z-index:1;padding:80px 0;}
   font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--red-1);
   letter-spacing:.12em;display:block;margin-bottom:10px;position:relative;z-index:1;
 }
-.about-card p{font-size:.92rem;line-height:1.62;color:var(--ink-dim);margin:0;position:relative;z-index:1;}
+.about-card p{font-size:.92rem;line-height:1.62;color:var(--ink-dim);margin:0;position:relative;z-index:1;text-wrap:balance;}
+.about-card p .lead{
+  display:block;margin-bottom:.45em;
+  font-size:1rem;font-weight:600;line-height:1.45;
+  color:var(--ink);letter-spacing:-.01em;
+}
 .about-card-num{
   position:absolute;right:-8px;top:-12px;
   font-family:'Unbounded',sans-serif;font-weight:900;font-size:6.5rem;
@@ -978,7 +983,7 @@ html.boot-active body::after{display:none;}
 
   <p class="hero-sub reveal">A small indie studio that makes games on <span>Unity</span> — and isn't afraid to experiment.</p>
 
-  <p class="hero-desc reveal">We're building a small team and making games on Unity (C#). We love voxel 3D graphics, but we don't limit ourselves to just that. Right now all focus is on our flagship project — <strong>WATERFALL</strong>.</p>
+  <p class="hero-desc reveal">We're building a small team and making games on Unity (C#). We love voxel 3D graphics, but we don't limit ourselves to just that. Right now all focus is on our main project — <strong>WATERFALL</strong>.</p>
 
   <div class="hero-cta reveal">
     <a class="btn btn-primary" href="https://t.me/buggedgames" target="_blank" rel="noopener">// BUGGED GAMES CHANNEL</a>
@@ -1009,17 +1014,17 @@ html.boot-active body::after{display:none;}
       <div class="about-card reveal">
         <span class="about-card-num">01</span>
         <span class="num">// 01</span>
-        <p>Every game starts with one question — "What if?" From that single idea, we experiment, prototype, and improve until it becomes something we're proud to share. We believe great games are built through curiosity, creativity, and attention to detail.</p>
+        <p><span class="lead">Every game starts with one question — "What if?"</span>From that single idea, we experiment, prototype, and improve until it becomes something we're proud to share. We believe great games are built through curiosity, creativity, and attention to detail.</p>
       </div>
       <div class="about-card reveal">
         <span class="about-card-num">02</span>
         <span class="num">// 02</span>
-        <p>Right now, our main focus is WATERFALL. It's our biggest project so far and the one we're fully committed to. While developing it, we're constantly refining gameplay, visuals, and every small detail to create the best experience we can.</p>
+        <p><span class="lead">Right now, our main focus is WATERFALL.</span>It's our biggest project so far and the one we're fully committed to. While developing it, we're constantly refining gameplay, visuals, and every small detail to create the best experience we can.</p>
       </div>
       <div class="about-card reveal">
         <span class="about-card-num">03</span>
         <span class="num">// 03</span>
-        <p>We're a small indie game studio with big ambitions. We enjoy exploring different genres, mechanics, and art styles instead of following a single formula. Every project teaches us something new and helps shape the games we'll create in the future.</p>
+        <p><span class="lead">We're a small indie game studio with big ambitions.</span>We enjoy exploring different genres, mechanics, and art styles instead of following a single formula. Every project teaches us something new and helps shape the games we'll create in the future.</p>
       </div>
     </div>
   </div>
@@ -1040,7 +1045,7 @@ html.boot-active body::after{display:none;}
       <button class="tab-btn flagship active" role="tab" data-panel="waterfall">
         <span class="flagship-dot"></span>
         WATERFALL
-        <span class="tab-flagship-badge">FLAGSHIP</span>
+        <span class="tab-flagship-badge">MAIN PROJECT</span>
       </button>
       <div class="tab-divider"></div>
       <button class="tab-btn" role="tab" data-panel="toaster">Toaster</button>
