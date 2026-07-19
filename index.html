@@ -180,24 +180,25 @@ html.pre-reveal .particles{opacity:0;}
 
 .boot-inner{
   position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;
-  gap:20px;padding:0 28px;width:100%;max-width:360px;
+  gap:clamp(14px, 2vh, 24px);padding:0 clamp(18px, 4vw, 36px);
+  width:100%;max-width:clamp(280px, 38vw, 420px);
 }
-.boot-logo-wrap{position:relative;width:88px;height:88px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.boot-logo-wrap{position:relative;width:clamp(64px, 10vmin, 100px);height:clamp(64px, 10vmin, 100px);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .boot-logo-ring{position:absolute;inset:0;border-radius:50%;border:1px solid rgba(56,236,245,.22);border-top-color:var(--cyan-1);animation:spin-slow 1.5s linear infinite;}
 .boot-logo-ring::after{content:'';position:absolute;inset:9px;border-radius:50%;border:1px dashed rgba(194,32,32,.32);animation:spin-slow 2.2s linear infinite reverse;}
 .boot-logo-img{width:54%;object-fit:contain;filter:drop-shadow(0 0 14px var(--red-glow)) drop-shadow(0 0 26px rgba(194,32,32,.32));animation:logo-breathe 2.2s ease-in-out infinite;}
 
-.boot-brand{font-family:'Unbounded',sans-serif;font-weight:800;font-size:.85rem;letter-spacing:.2em;color:var(--ink);text-align:center;}
+.boot-brand{font-family:'Unbounded',sans-serif;font-weight:800;font-size:clamp(.7rem, 1.2vw, .95rem);letter-spacing:.2em;color:var(--ink);text-align:center;}
 .boot-brand .blink{color:var(--cyan-1);animation:blink .8s step-end infinite;}
 
-.boot-log{font-family:'JetBrains Mono',monospace;font-size:.7rem;line-height:1.75;color:var(--ink-muted);min-height:96px;width:100%;}
+.boot-log{font-family:'JetBrains Mono',monospace;font-size:clamp(.6rem, 1vw, .75rem);line-height:1.75;color:var(--ink-muted);min-height:clamp(72px, 10vh, 108px);width:100%;}
 .boot-log div{opacity:0;transform:translateX(-6px);animation:boot-log-in .3s ease forwards;}
 .boot-log div b{color:var(--cyan-1);font-weight:600;}
 @keyframes boot-log-in{to{opacity:1;transform:translateX(0);}}
 
-.boot-bar{width:100%;height:3px;border-radius:99px;background:rgba(240,238,238,.08);overflow:hidden;}
+.boot-bar{width:100%;height:clamp(2px, 0.3vh, 4px);border-radius:99px;background:rgba(240,238,238,.08);overflow:hidden;}
 .boot-bar-fill{height:100%;width:0%;border-radius:99px;background:linear-gradient(90deg,var(--red-1),var(--cyan-1));transition:width .14s linear;}
-.boot-meta{display:flex;align-items:center;justify-content:space-between;width:100%;font-family:'JetBrains Mono',monospace;font-size:.66rem;letter-spacing:.1em;color:var(--ink-muted);text-transform:uppercase;}
+.boot-meta{display:flex;align-items:center;justify-content:space-between;width:100%;font-family:'JetBrains Mono',monospace;font-size:clamp(.56rem, 0.9vw, .7rem);letter-spacing:.1em;color:var(--ink-muted);text-transform:uppercase;}
 .boot-pct{color:var(--cyan-1);font-weight:600;}
 
 .boot-skip{
@@ -241,8 +242,7 @@ html.pre-reveal .particles{opacity:0;}
 
 /* ── SVG LOGO IN HEADER ── */
 .brand-logo-svg{
-  width:32px;height:32px;flex-shrink:0;
-  object-fit:contain;
+  width:clamp(30px, 3vw, 44px);height:auto;flex-shrink:0;
   transition:filter .3s;
 }
 .brand-logo-svg:hover{filter:drop-shadow(0 0 6px var(--red-1));}
@@ -1009,17 +1009,17 @@ html.boot-active body::after{display:none;}
       <div class="about-card reveal">
         <span class="about-card-num">01</span>
         <span class="num">// 01</span>
-        <p>We're a small independent studio. We make games on Unity, write in C#, and strive to make every project feel complete — from gameplay to the last pixel of the interface.</p>
+        <p>Every game starts with one question — "What if?" From that single idea, we experiment, prototype, and improve until it becomes something we're proud to share. We believe great games are built through curiosity, creativity, and attention to detail.</p>
       </div>
       <div class="about-card reveal">
         <span class="about-card-num">02</span>
         <span class="num">// 02</span>
-        <p>Voxel 3D is our signature style, but we don't restrict ourselves to just that — we also have 2D projects. What all of them share is attention to detail.</p>
+        <p>Right now, our main focus is WATERFALL. It's our biggest project so far and the one we're fully committed to. While developing it, we're constantly refining gameplay, visuals, and every small detail to create the best experience we can.</p>
       </div>
       <div class="about-card reveal">
         <span class="about-card-num">03</span>
         <span class="num">// 03</span>
-        <p>Right now the entire team is focused on WATERFALL — our main project. Other games are at various stages of development; details will appear here as they're ready.</p>
+        <p>We're a small indie game studio with big ambitions. We enjoy exploring different genres, mechanics, and art styles instead of following a single formula. Every project teaches us something new and helps shape the games we'll create in the future.</p>
       </div>
     </div>
   </div>
