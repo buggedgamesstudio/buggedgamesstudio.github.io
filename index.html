@@ -30,25 +30,25 @@
 <meta property="og:url" content="https://buggedgames.studio/"/>
 <meta property="og:title" content="Bugged Games — Indie Studio"/>
 <meta property="og:description" content="A small indie studio making games on Unity (C#): voxel 3D and 2D. Main project — WATERFALL."/>
-<meta property="og:image" content="assets/logo3.png"/>
+<meta property="og:image" content="assets/logo.png"/>
 
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="Bugged Games — Indie Studio"/>
 <meta name="twitter:description" content="A small indie studio making games on Unity (C#). Main project — WATERFALL."/>
-<meta name="twitter:image" content="assets/logo3.png"/>
+<meta name="twitter:image" content="assets/logo.png"/>
 
 <!-- Resource hints -->
 <link rel="dns-prefetch" href="https://t.me"/>
 <link rel="dns-prefetch" href="https://buggedgamesstudio.itch.io"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link rel="preload" href="assets/logo3.png" as="image"/>
+<link rel="preload" href="assets/logo.png" as="image"/>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;800;900&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 
 <!-- Structured data -->
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"Organization","name":"Bugged Games","url":"https://buggedgames.studio/","logo":"assets/logo3.png","description":"A small indie studio making games on Unity (C#): voxel 3D and 2D.","sameAs":["https://t.me/buggedgames","https://buggedgamesstudio.itch.io/"]}
+{"@context":"https://schema.org","@type":"Organization","name":"Bugged Games","url":"https://buggedgames.studio/","logo":"assets/logo.png","description":"A small indie studio making games on Unity (C#): voxel 3D and 2D.","sameAs":["https://t.me/buggedgames","https://buggedgamesstudio.itch.io/"]}
 </script>
 <style>
 :root{
@@ -84,7 +84,11 @@ body{
 }
 a{color:inherit;text-decoration:none;}
 img{max-width:100%;display:block;}
-::selection{background:rgba(56,236,245,.25);color:#fff;}
+::selection{background:transparent;color:inherit;}
+.sel-hl{position:fixed;pointer-events:none;border-radius:5px;background:rgba(194,32,32,.1);box-shadow:0 0 0 1px rgba(194,32,32,.2);z-index:9990;opacity:0;transition:opacity .15s ease;}
+.sel-hl.sel-visible{opacity:1;}
+body{user-select:none;-webkit-user-select:none;}
+.hero-sub,.hero-desc,.about-card p{user-select:text;-webkit-user-select:text;}
 
 /* ── CUSTOM CURSOR ── */
 .cursor-dot{
@@ -516,10 +520,10 @@ section{position:relative;z-index:1;padding:80px 0;}
 }
 @media(max-width:860px){.about-grid{grid-template-columns:1fr;}}
 .about-card{
-  background:var(--bg-card);
   border-radius:var(--radius);padding:26px 24px;
   transition:transform .25s, border-color .25s, box-shadow .25s;
   position:relative;overflow:hidden;
+  isolation:isolate;
   border-left:2px solid transparent;
   background:linear-gradient(var(--bg-card),var(--bg-card)) padding-box,
              linear-gradient(180deg,var(--red-1),rgba(194,32,32,.2)) border-box;
@@ -936,7 +940,7 @@ html.boot-active body::after{display:none;}
 <header class="site-header" id="siteHeader">
   <div class="header-inner">
     <a class="brand" href="#" data-scroll="home">
-      <img class="brand-logo-svg" src="assets/logo3.png" alt="Bugged Games logo" fetchpriority="high" decoding="sync"/>
+      <img class="brand-logo-svg" src="assets/logo.png" alt="Bugged Games logo" fetchpriority="high" decoding="sync"/>
       <span class="brand-name">BUGGED GAMES</span>
       <span class="brand-kicker">// indie studio</span>
     </a>
